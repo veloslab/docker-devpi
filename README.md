@@ -68,9 +68,8 @@ docker-compose up -d
 - `-d`: Runs the container in detached mode (in the background).
 
 On the first run, the entrypoint script will:
-1.  Check that the `./data` directory is exists/is empty.
-2.  Set the correct ownership on the `./data` directory.
-3.  Initialize `devpi-server` and create the `root` user with the password you provided.
+1.  Generate a secret file via `devpi devpi-gen-secret`
+2.  Initialize `devpi-server` and create the `root` user with the password you provided.
 
 On subsequent runs, it will skip these steps and start the server immediately.
 
