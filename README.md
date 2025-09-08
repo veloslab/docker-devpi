@@ -4,35 +4,21 @@ This repository contains the configuration for a robust, secure, and production-
 
 This image is designed with a focus on security, data integrity, and ease of use. It includes an intelligent entrypoint script that automatically handles permissions and initialization, as well as a robust health check to ensure the service is running correctly.
 
-## Features
-
-- **Non-Root Container**: Runs the `devpi-server` process as an unprivileged `devpi` user to limit the potential impact of a security vulnerability.
-- **Automatic Permissions Handling**: The entrypoint script automatically sets correct filesystem permissions on the data volume during the initial run, preventing common permission errors when using bind mounts.
-- **Idempotent Initialization**: The server is automatically initialized on its first run. This process is skipped on subsequent runs to prevent data loss.
-- **Required Root Password**: Enforces security by requiring a root password to be set via an environment variable on the first run.
-- **Persistent Data Storage**: Uses a Docker volume to persist all `devpi-server` data, including packages and user information, across container restarts.
-- **Robust Health Checking**: Includes a `HEALTHCHECK` instruction that not only verifies that the server is running but also confirms that authentication with the root password is functional.
-- **Graceful Shutdown**: The entrypoint uses `exec` to ensure that the `devpi-server` process can receive signals from the Docker daemon (e.g., from `docker stop`) and shut down gracefully.
-
 ## Project Structure
 
 To use this configuration, your project should be organized as follows:
 
 ```
-/my-devpi-server/
-├── data/
-├── docker-compose.yml
+/docker-devpi/
 ├── docker-entrypoint.sh
 ├── docker-healthcheck.sh
 ├── Dockerfile
 └── requirements.txt
 ```
-
-- `docker-compose.yml`: The main file for defining and running the service.
 - `docker-entrypoint.sh`: The script that handles initialization and permissions.
 - `docker-healthcheck.sh`: The script used for the container health check.
 - `Dockerfile`: The instructions to build the Docker image.
-- `requirements.txt`: A file to list any additional Python packages you wish to install (e.g., `devpi-web`).
+- `requirements.txt`: Python Requirements
 
 ## Configuration
 
@@ -41,8 +27,6 @@ The container is configured using environment variables.
 | Variable                    | Description                                                                                             | Required | Default             |
 | --------------------------- | ------------------------------------------------------------------------------------------------------- | -------- | ------------------- |
 | `DEVPISERVER_ROOT_PASSWORD` | The password for the `root` user. This is **required** for the first time the container is run.           | **Yes**  | `null`              |
-| `DEVPISERVER_SERVERDIR`     | The directory inside the container where server data is stored. This is managed by the volume mount.    | No       | `/var/devpi/server` |
-| `DEVPISERVER_PORT`          | The port the server listens on inside the container.                                                    | No       | `3141`              |
 | `USER_UID`                  | The UID of the `devpi` user inside the container.                                                       | No       | `1000`              |
 | `USER_GID`                  | The GID of the `devpi` group inside the container.                                                      | No       | `1000`              |
 
@@ -57,7 +41,7 @@ Use the following `docker-compose.yml` file.
 ```
 services:
   devpi:
-    build: .
+    image: ghcr.io/veloslab/devpi
     container_name: devpi_server
     restart: unless-stopped
     ports:
@@ -79,14 +63,12 @@ Before you start, **you must change `YourSecretPassword`** in the `docker-compos
 Open a terminal in the root of your project directory and run the following command:
 
 ```
-docker-compose up --build -d
+docker-compose up -d
 ```
-
-- `--build`: Builds the Docker image from the `Dockerfile`.
 - `-d`: Runs the container in detached mode (in the background).
 
 On the first run, the entrypoint script will:
-1.  Check that the `./data` directory is empty.
+1.  Check that the `./data` directory is exists/is empty.
 2.  Set the correct ownership on the `./data` directory.
 3.  Initialize `devpi-server` and create the `root` user with the password you provided.
 
@@ -97,7 +79,7 @@ On subsequent runs, it will skip these steps and start the server immediately.
 After about a minute, you can check the status and health of the container:
 
 ```
-docker ps
+docker compose ps
 ```
 
 The `STATUS` column for the `devpi_server` container should show `(healthy)`. If it shows `(health: starting)`, wait a bit longer. If it shows `(unhealthy)`, check the logs for errors:
