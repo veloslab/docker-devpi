@@ -1,0 +1,19 @@
+services:
+  devpi:
+    # Tells Compose to build the image from the Dockerfile in the current directory
+    build: .
+    # Names the container for easier reference
+    container_name: devpi_server
+    # Always restart the container unless it is explicitly stopped
+    restart: unless-stopped
+    ports:
+      # Maps port 3141 on the host to port 3141 in the container
+      - "3141:3141"
+    environment:
+      # Set the required root password. For production, use Docker secrets.
+      - DEVPISERVER_ROOT_PASSWORD=YourSecretPassword
+    volumes:
+      # Mounts the local ./data directory to /var/devpi/server inside the container
+      # This is the bind mount for persisting devpi data [45, 49].
+      - ./data:/var/devpi/server
+
