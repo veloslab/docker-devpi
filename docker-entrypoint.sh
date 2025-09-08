@@ -39,4 +39,4 @@ fi
 
 # Start the server as the 'devpi' user, now including the persistent secret.
 echo "Starting devpi-server"
-exec gosu devpi sh -c "devpi-server --secretfile "$SECRET_FILE" "$@"
+exec gosu devpi sh -c "devpi-server --secretfile "$SECRET_FILE"" "$@"
