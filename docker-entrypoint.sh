@@ -19,7 +19,7 @@ fi
 # This ensures login tokens will be persistent across restarts.
 if ! gosu devpi test -f "$SECRET_FILE"; then
     echo "Secret file not found. Generating a new persistent secret at $SECRET_FILE..."
-    gosu devpi devpi-gen-secret > "$SECRET_FILE"
+    gosu devpi sh -c "devpi-gen-secret > '$SECRET_FILE'"
 fi
 
 # Check if the server needs to be initialized.
