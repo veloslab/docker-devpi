@@ -1,0 +1,62 @@
+#
+# name: Create and publish a Docker image
+#
+# Configures this workflow to run every time a git tag matching 'v*' (e.g., v1.0.0) is pushed.
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Defines environment variables for the workflow.
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    # Sets the permissions granted to the GITHUB_TOKEN for the actions in this job.
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        # Pins the action to the latest commit SHA for security and stability.
+        uses: actions/checkout@a5ac7e51b4109f5124f956403932e2282349da34 # v4.1.7
+
+      - name: Set up Docker Buildx
+        # Adds the Buildx action to enable features like caching and multi-platform builds.
+        uses: docker/setup-buildx-action@09b5027733451553f147514352161f22c19a3194 # v3.3.0
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@e92390c5fb420da14ff2c1f245d69ae698c6027d # v3.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a86 # v5.5.1
+        with:
+          # Sets the desired image name to 'veloslab/devpi'
+          images: ${{ env.REGISTRY }}/veloslab/devpi
+          # Generates a set of tags based on the Git event.
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@a609747a164a6f2b035133e6f7902e4ac6198f1f # v5.4.0
+        with:
+          context: .
+          # The 'push' parameter is set to true to push the image after a successful build.
+          push: true
+          # Uses the tags and labels generated in the 'meta' step.
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Enables caching to speed up subsequent builds.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
