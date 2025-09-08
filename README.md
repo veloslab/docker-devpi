@@ -1,4 +1,4 @@
-# Devpi-Server Docker Image
+# Devpi Docker Image
 
 This repository contains the configuration for a robust, secure, and production-ready Docker image for `devpi-server`, a powerful private PyPI server.
 
