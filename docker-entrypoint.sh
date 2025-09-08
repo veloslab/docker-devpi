@@ -11,6 +11,7 @@ SECRET_FILE="$DEVPISERVER_SERVERDIR/.secret"
 if [ -z "$(ls -A "$DEVPISERVER_SERVERDIR")" ]; then
     echo "$DEVPISERVER_SERVERDIR is empty. Setting ownership for devpi user..."
     chown devpi:devpi "$DEVPISERVER_SERVERDIR"
+    chmod 700 "$DEVPISERVER_SERVERDIR"
 fi
 
 # Now that permissions are correct for an initial run, proceed as the 'devpi' user.
@@ -19,7 +20,7 @@ fi
 # This ensures login tokens will be persistent across restarts.
 if ! gosu devpi test -f "$SECRET_FILE"; then
     echo "Secret file not found. Generating a new persistent secret at $SECRET_FILE..."
-    gosu devpi sh -c "devpi-gen-secret > '$SECRET_FILE'"
+    gosu devpi sh -c "devpi-gen-secret --secretfile '$SECRET_FILE'"
 fi
 
 # Check if the server needs to be initialized.
@@ -38,4 +39,4 @@ fi
 
 # Start the server as the 'devpi' user, now including the persistent secret.
 echo "Starting devpi-server"
-exec gosu devpi devpi-server --secretfile "$SECRET_FILE" "$@"
+exec gosu devpi sh -c "devpi-server --secretfile "$SECRET_FILE" "$@"
