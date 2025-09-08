@@ -24,7 +24,7 @@ VOLUME $DEVPISERVER_SERVERDIR
 
 # Copy requirements and install packages, including devpi-client for the healthcheck
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt devpi-client
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy entrypoint and healthcheck scripts
 COPY docker-entrypoint.sh /usr/local/bin/
