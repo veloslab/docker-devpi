@@ -1,3 +1,4 @@
+setuptools
 devpi-server==6.17.0
 devpi-web==5.0.1
 devpi-tokens==1.1.0
