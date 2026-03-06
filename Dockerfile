@@ -12,7 +12,7 @@ ENV PYTHONWARNINGS=ignore:pkg_resources
 
 # Install dependencies, gosu for privilege management, and create a non-root user
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends gosu && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl gosu && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --gid $USER_GID devpi && \
     useradd --uid $USER_UID --gid $USER_GID --shell /bin/bash --create-home devpi
@@ -23,7 +23,7 @@ RUN mkdir -p $DEVPISERVER_SERVERDIR && chown devpi:devpi $DEVPISERVER_SERVERDIR
 # Use a volume for persistent storage
 VOLUME $DEVPISERVER_SERVERDIR
 
-# Copy requirements and install packages, including devpi-client for the healthcheck
+# Copy requirements and install packages
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -36,10 +36,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-healthche
 # Expose the port
 EXPOSE 3141
 
-# Add a healthcheck to monitor server status and root password validity.
+# Add a healthcheck to monitor server status.
 # It waits 30 seconds before the first check to allow the server to start.
 HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
-  CMD ["gosu", "devpi", "/usr/local/bin/docker-healthcheck.sh"]
+  CMD ["/usr/local/bin/docker-healthcheck.sh"]
 
 # Set the entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]

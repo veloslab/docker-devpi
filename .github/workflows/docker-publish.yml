@@ -46,9 +46,15 @@ jobs:
 
       - name: Wait for healthy
         run: |
-          timeout 120 bash -c \
-            'until [ "$(docker inspect -f "{{.State.Health.Status}}" devpi)" = "healthy" ]; \
-            do echo "Waiting..."; sleep 5; done'
+          timeout 240 bash -c '
+            while true; do
+              STATUS=$(docker inspect -f "{{.State.Health.Status}}" devpi)
+              echo "Health status: $STATUS"
+              [ "$STATUS" = "healthy" ] && exit 0
+              [ "$STATUS" = "unhealthy" ] && exit 1
+              sleep 5
+            done
+          '
 
       - name: Test devpi client operations
         run: |
