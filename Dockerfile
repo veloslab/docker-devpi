@@ -11,6 +11,7 @@ ENV DEVPISERVER_PORT 3141
 ENV PYTHONWARNINGS=ignore:pkg_resources
 
 # Install dependencies, gosu for privilege management, and create a non-root user
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends gosu && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --gid $USER_GID devpi && \
@@ -23,6 +24,7 @@ RUN mkdir -p $DEVPISERVER_SERVERDIR && chown devpi:devpi $DEVPISERVER_SERVERDIR
 VOLUME $DEVPISERVER_SERVERDIR
 
 # Copy requirements and install packages, including devpi-client for the healthcheck
+WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
