@@ -1,5 +1,4 @@
-# Use the official Python 3.13 slim base image
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Set default UID/GID for the devpi user. Can be overridden at build time.
 ARG USER_UID=1000
@@ -26,11 +25,10 @@ VOLUME $DEVPISERVER_SERVERDIR
 # Copy requirements and install packages
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-# Re-install setuptools after dependency resolution so pkg_resources is available at runtime.
-# pip 24+ may drop setuptools from the runtime environment when resolving deps.
-RUN pip install --no-cache-dir --force-reinstall setuptools && \
-    python -c "import pkg_resources" || (echo "ERROR: pkg_resources not importable after setuptools install" && exit 1)
+# Ensure we have pkg_resources, setuptools<75 required:
+# pyramid uses pkg_resources at runtime, removed in setuptools 75+.
+RUN pip install --no-cache-dir -r requirements.txt && \
+    python -c "import pkg_resources"
 
 # Copy entrypoint and healthcheck scripts
 COPY docker-entrypoint.sh /usr/local/bin/

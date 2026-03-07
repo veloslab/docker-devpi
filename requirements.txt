@@ -1,4 +1,7 @@
-devpi-server==6.17.0
+# setuptools<75 required: pyramid uses pkg_resources at runtime, removed in setuptools 75+.
+# devpi-server upstream pins <=81 but that is too permissive. Remove once pyramid drops pkg_resources.
+setuptools<75
+devpi-server==6.19.1
 devpi-web==5.0.1
 devpi-tokens==1.1.0
 # For Client
