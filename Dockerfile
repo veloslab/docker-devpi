@@ -1,5 +1,5 @@
 # Use the official Python 3.13 slim base image
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 # Set default UID/GID for the devpi user. Can be overridden at build time.
 ARG USER_UID=1000
@@ -26,8 +26,7 @@ VOLUME $DEVPISERVER_SERVERDIR
 # Copy requirements and install packages
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir setuptools && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy entrypoint and healthcheck scripts
 COPY docker-entrypoint.sh /usr/local/bin/
