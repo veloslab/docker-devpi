@@ -62,8 +62,8 @@ jobs:
           devpi use http://localhost:3141
           devpi login root --password Test1234!
           devpi user -c ciuser password=CiPass123!
-          devpi login ciuser --password CiPass123!
           devpi index -c ciuser/dev
+          devpi login ciuser --password CiPass123!
           devpi use ciuser/dev
           echo "All operations succeeded"
 
