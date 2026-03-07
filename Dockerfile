@@ -26,7 +26,8 @@ VOLUME $DEVPISERVER_SERVERDIR
 # Copy requirements and install packages
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir setuptools && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy entrypoint and healthcheck scripts
 COPY docker-entrypoint.sh /usr/local/bin/
