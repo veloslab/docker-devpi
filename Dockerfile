@@ -27,6 +27,10 @@ VOLUME $DEVPISERVER_SERVERDIR
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# Re-install setuptools after dependency resolution so pkg_resources is available at runtime.
+# pip 24+ may drop setuptools from the runtime environment when resolving deps.
+RUN pip install --no-cache-dir --force-reinstall setuptools && \
+    python -c "import pkg_resources" || (echo "ERROR: pkg_resources not importable after setuptools install" && exit 1)
 
 # Copy entrypoint and healthcheck scripts
 COPY docker-entrypoint.sh /usr/local/bin/
